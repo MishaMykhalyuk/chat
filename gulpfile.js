@@ -3,6 +3,7 @@ const path = require('path');
 const del = require('del');
 const rename = require('gulp-rename');
 const babel = require('gulp-babel');
+const babelify = require('babelify');
 const watch = require('gulp-watch');
 const babelEs6 = require('babel-preset-es2015');
 const babelReact = require('babel-preset-react');
@@ -15,7 +16,7 @@ gulp.task('default', ['clean-bundle'], () => {
 			presets: [babelEs6, babelReact]
 		}))
 		.pipe(browserify({
-			debug : true
+			transform: [babelify]
 		}))
 		.pipe(rename('bundle.js'))
 		.pipe(gulp.dest('dist/js/'));
