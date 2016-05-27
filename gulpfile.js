@@ -1,29 +1,20 @@
 const gulp = require('gulp');
-const path = require('path');
 const del = require('del');
-const rename = require('gulp-rename');
-const babel = require('gulp-babel');
-const babelify = require('babelify');
-const watch = require('gulp-watch');
-const babelEs6 = require('babel-preset-es2015');
-const babelReact = require('babel-preset-react');
-const browserify = require('gulp-browserify');
+const browserify = require('browserify');
+const source = require('vinyl-source-stream');
 
-gulp.task('default', ['clean-bundle'], () => {
-	return gulp.src('src/js/**.js')
-		.pipe(watch('src/js/**.js', logChanges))
-		.pipe(babel({
-			presets: [babelEs6, babelReact]
-		}))
-		.pipe(browserify({
-			transform: [babelify]
-		}))
-		.pipe(rename('bundle.js'))
+gulp.task('bundle', ['clean-bundle'], () => {
+	return browserify({entries: './src/js/index.js', debug: true})
+		.transform('babelify', {presets: ['es2015', 'react']})
+		.bundle()
+		.pipe(source('bundle.js'))
 		.pipe(gulp.dest('dist/js/'));
 });
 
-gulp.task('clean-bundle', () => del('dist/js/*.*', {force: true}));
+gulp.task('watch', ['bundle'], () => {
+	gulp.watch('src/js/*.js', ['bundle']);
+});
 
-function logChanges(file){
-	 console.log('File ' + path.relative(process.cwd(), file.history[0]) + ' was changed');
-}
+gulp.task('clean-bundle', () => del('dist/js/bundle.js', {force: true}));
+
+gulp.task('default', ['watch']);
